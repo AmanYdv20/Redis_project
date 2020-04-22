@@ -5,6 +5,7 @@ using namespace std;
 using namespace std::chrono;
 #define func_time std::chrono::high_resolution_clock::time_point
 
+//Comparator function for set to be sorted in ascending order of rank of values.
 struct Cmp
 {
     bool operator ()(const pair<string, int> &a, const pair<string,int> &b)
@@ -13,6 +14,7 @@ struct Cmp
     }
 };
 
+//node for storing the key value pair with the defualt expire time of -1, otherwise inputed by the user.
 struct node{
     string value;
     func_time start;
@@ -24,14 +26,20 @@ struct node{
     }
 };
 
+//This map is used for storing the nodes along with the expire time of a node
 unordered_map<string, node*> mp;
+
+//This map is used for storing the values in sorted order corresponding to a key.
 unordered_map<string, set <pair<string, int>, Cmp>> zmp;
+
 //This hash table is for checking if the value with the particular key is already present.
 map<pair<string,string>, int> c_mp;
 
 //here the partiular key with value will be first checked in c_mp and then it will insert the value in the map.
 // //c_mp is of no use because i am not able to track the rank.
-int z_add(string key, int rank, string value){
+
+//Function for setting the value for a key with the given rank.
+int zadd(string key, int rank, string value){
     auto p=make_pair(key,value);
     if(c_mp.count(p)==0){
         zmp[key].insert(make_pair(value,rank));
@@ -56,6 +64,7 @@ int zrank(string key, string value){
     return pos;
 }
 
+//The function for printing the value in a given range.
 void zrange(string key, int start, int end){
     if(start < 0 && end < 0){
         auto it=zmp[key].rbegin();
@@ -78,7 +87,8 @@ void zrange(string key, int start, int end){
     }
 }
 
-void set_mp(string key, string val, int ex=-1){
+//Function for setting the key and value
+void set_key(string key, string val, int ex=-1){
     func_time tmp=high_resolution_clock::now();
     if(ex == -1){
         mp[key]=new node(val, tmp);
@@ -87,10 +97,13 @@ void set_mp(string key, string val, int ex=-1){
     }
 }
 
-string get_mp(string key){
+//function for getting the value of a node for given key.
+string get_key(string key){
+    //if key is not present in the map
     if(mp.count(key)==0){
         return "Sorry!! Key does not Found";
     } else{
+        //if there is an expiration time of a key
         if(mp[key] -> expire != -1){
             func_time stop=high_resolution_clock::now();
             auto duration=duration_cast<seconds>(stop - (mp[key]->start));
@@ -102,6 +115,7 @@ string get_mp(string key){
                 return mp[key]->value;
             }
         } else {
+            //return the value of a key if the there is no expire time of a key.
             return mp[key]->value;
         }
     }
@@ -122,26 +136,35 @@ string expire_key(string key, int exp){
 }
 
 int main(){
-    // set_mp("aman", "yadav");
-    // cout<<mp["aman"]->value<<endl;
-    // cout<<mp["aman"]->expire;
-    // int sum=0;
+    //uncomment the below code to see the working of the code.
+    /*Function for setting the key without expire time
 
-    // for(int i=0;i<100000;i++){
-    //     for(int j=0;j<10000;j++){
-    //         sum += 1;
-    //     }
-    // }
-    // cout<<get_mp("aman")<<endl;
+    set_key("aman", "yadav");
+
+    cout<<mp["aman"]->value<<endl;
+
+
+    int sum=0;
+
+    for(int i=0;i<100000;i++){
+        for(int j=0;j<10000;j++){
+            sum += 1;
+        }
+    }
+    cout<<get_key("aman")<<endl;
+
+    */
+
+   /*
     string key="aman";
     string key2="priya";
-    z_add(key,2,"yadav");
-    z_add(key,5,"pratap");
-    z_add(key,12,"Jadon");
-    z_add(key,19,"Jadon");
-    z_add(key2,2,"yadav");
-    z_add(key2,5,"pratap");
-    z_add(key2,12,"Jadon");
+    zadd(key,2,"yadav");
+    zadd(key,5,"pratap");
+    zadd(key,12,"Jadon");
+    zadd(key,19,"Jadon");
+    zadd(key2,2,"yadav");
+    zadd(key2,5,"pratap");
+    zadd(key2,12,"Jadon");
     zrange("aman",-1,-2);
     //cout<<zrank("priya","yadav");
 
@@ -149,5 +172,7 @@ int main(){
     // for(auto it:c_mp){
     //     cout<<it.first.first<<" "<<it.first.second<<" "<<it.second<<endl;
     // }
+
+    */
     return 0;
 }
